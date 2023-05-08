@@ -48,7 +48,6 @@ export default class Dispatcher {
     }
     async play() {
         if (!this.exists || (!this.queue.length && !this.current)) {
-            this.destroy();
             return;
         }
         this.current = this.queue.length !== 0 ? this.queue.shift() : this.queue[0];
@@ -127,7 +126,9 @@ export default class Dispatcher {
         if (!this.player)
             return;
         this.queue.length = 0;
+        this.loop = 'off';
         this.repeat = 0;
+        this.stopped = true;
         this.player.stopTrack();
     }
     setLoop(loop) {

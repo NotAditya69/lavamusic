@@ -15,7 +15,36 @@ export default class InteractionCreate extends Event {
     });
   }
   public async run(interaction: Interaction | CommandInteraction | any): Promise<void> {
-    if (interaction.type === InteractionType.ApplicationCommand) {
+    if (interaction.type == InteractionType.ApplicationCommandAutocomplete) {
+      if (interaction.commandName == "play") {
+        const song = interaction.options.getString("song")
+        let player = this.client.queue.get(interaction.guildId)
+        if (!player) {
+          player = await this.client.queue.create(interaction.guild, interaction.member.voice.channel, interaction.channel, this.client.shoukaku.getNode());
+        }
+        const res = await this.client.queue.search(song)
+        let songs = []
+        switch (res.loadType) {
+          case 'LOAD_FAILED':
+            break;
+          case 'NO_MATCHES':
+            break;
+          case 'TRACK_LOADED':
+            break;
+          case 'PLAYLIST_LOADED':
+            break;
+          case 'SEARCH_RESULT':
+            songs.push({
+              name: res.tracks[0].info.title,
+              value: res.tracks[0].info.uri
+            });
+            break;
+          default:
+            break;
+        }
+        interaction.respond(songs).catch(() => { })
+      }
+    } else if (interaction.type === InteractionType.ApplicationCommand) {
       const { commandName } = interaction;
       const command = this.client.commands.get(interaction.commandName);
       if (!command) return;
@@ -32,7 +61,7 @@ export default class InteractionCreate extends Event {
           .send({
             content: `I don't have **\`SendMessage\`** permission in \`${interaction.guild.name}\`\nchannel: <#${interaction.channelId}>`,
           })
-          .catch(() => {});
+          .catch(() => { });
       }
 
       if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.EmbedLinks))
@@ -88,7 +117,6 @@ export default class InteractionCreate extends Event {
             return await interaction.reply({
               content: `I don't have \`REQUEST TO SPEAK\` permission to execute this \`${command.name}\` command.`,
             });
-
           if (interaction.guild.members.me.voice.channel) {
             if (interaction.guild.members.me.voice.channelId !== interaction.member.voice.channelId)
               return await interaction.reply({
@@ -111,28 +139,20 @@ export default class InteractionCreate extends Event {
             });
         }
         if (command.player.dj) {
-          const data = await this.client.prisma.guild.findUnique({
+          const djRole = await this.client.prisma.dj.findUnique({
             where: {
               guildId: interaction.guildId,
             },
+            include: { roles: true },
           });
-          if (data) {
-            const djRole = await this.client.prisma.dj.findUnique({
-              where: {
-                guildId: interaction.guildId,
-              },
-              include: { roles: true },
-            });
-            if (djRole) {
-              const djRoles = djRole.roles;
-              const findDJRole = interaction.member.roles.cache.find((x) => djRoles.includes(x.id));
-              if (!findDJRole) {
-                if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-                  return await interaction.reply({
-                    content: 'You need to have the DJ role to use this command.',
-                    ephemeral: true,
-                  });
-                }
+          if (djRole && djRole.mode) {
+            const findDJRole = interaction.member.roles.cache.find((x: any) => djRole.roles.map((y: any) => y.roleId).includes(x.id));
+            if (!findDJRole) {
+              if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                return await interaction.reply({
+                  content: 'You need to have the DJ role to use this command.',
+                  ephemeral: true,
+                });
               }
             }
           }

@@ -1,5 +1,5 @@
 import { Event } from '../../structures/index.js';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 export default class TrackStart extends Event {
     constructor(client, file) {
         super(client, file, {
@@ -53,7 +53,7 @@ export default class TrackStart extends Event {
         });
         dispatcher.nowPlayingMessage = message;
         const collector = message.createMessageComponentCollector({
-            filter: (b) => {
+            filter: (async (b) => {
                 if (b.guild.members.me.voice.channel && b.guild.members.me.voice.channelId === b.member.voice.channelId)
                     return true;
                 else {
@@ -63,10 +63,36 @@ export default class TrackStart extends Event {
                     });
                     return false;
                 }
-            },
-            time: track.info.isStream ? 86400000 : track.info.length,
+            }),
+            //time: track.info.isStream ? 86400000 : track.info.length,
         });
+        async function checkDj(client, interaction) {
+            const djRole = await client.prisma.dj.findUnique({
+                where: {
+                    guildId: interaction.guildId,
+                },
+                include: { roles: true },
+            });
+            if (djRole && djRole.mode) {
+                const findDJRole = interaction.member.roles.cache.find((x) => djRole.roles.map((y) => y.roleId).includes(x.id));
+                if (!findDJRole) {
+                    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                        return false;
+                    }
+                }
+                else
+                    return true;
+            }
+            return true;
+        }
         collector.on('collect', async (interaction) => {
+            if (!(await checkDj(this.client, interaction))) {
+                await interaction.reply({
+                    content: `You need to have the DJ role to use this command.`,
+                    ephemeral: true,
+                });
+                return;
+            }
             switch (interaction.customId) {
                 case 'previous':
                     if (!dispatcher.previous) {

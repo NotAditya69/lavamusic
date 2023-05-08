@@ -7,7 +7,37 @@ export default class InteractionCreate extends Event {
         });
     }
     async run(interaction) {
-        if (interaction.type === InteractionType.ApplicationCommand) {
+        if (interaction.type == InteractionType.ApplicationCommandAutocomplete) {
+            if (interaction.commandName == "play") {
+                const song = interaction.options.getString("song");
+                let player = this.client.queue.get(interaction.guildId);
+                if (!player) {
+                    player = await this.client.queue.create(interaction.guild, interaction.member.voice.channel, interaction.channel, this.client.shoukaku.getNode());
+                }
+                const res = await this.client.queue.search(song);
+                let songs = [];
+                switch (res.loadType) {
+                    case 'LOAD_FAILED':
+                        break;
+                    case 'NO_MATCHES':
+                        break;
+                    case 'TRACK_LOADED':
+                        break;
+                    case 'PLAYLIST_LOADED':
+                        break;
+                    case 'SEARCH_RESULT':
+                        songs.push({
+                            name: res.tracks[0].info.title,
+                            value: res.tracks[0].info.uri
+                        });
+                        break;
+                    default:
+                        break;
+                }
+                interaction.respond(songs).catch(() => { });
+            }
+        }
+        else if (interaction.type === InteractionType.ApplicationCommand) {
             const { commandName } = interaction;
             const command = this.client.commands.get(interaction.commandName);
             if (!command)
@@ -93,38 +123,30 @@ export default class InteractionCreate extends Event {
                         });
                 }
                 if (command.player.dj) {
-                    const data = await this.client.prisma.guild.findUnique({
+                    const djRole = await this.client.prisma.dj.findUnique({
                         where: {
                             guildId: interaction.guildId,
                         },
+                        include: { roles: true },
                     });
-                    if (data) {
-                        const djRole = await this.client.prisma.dj.findUnique({
-                            where: {
-                                guildId: interaction.guildId,
-                            },
-                            include: { roles: true },
-                        });
-                        if (djRole) {
-                            const djRoles = djRole.roles;
-                            const findDJRole = interaction.member.roles.cache.find((x) => djRoles.includes(x.id));
-                            if (!findDJRole) {
-                                if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-                                    return await interaction.reply({
-                                        content: 'You need to have the DJ role to use this command.',
-                                        ephemeral: true,
-                                    });
-                                }
+                    if (djRole && djRole.mode) {
+                        const findDJRole = interaction.member.roles.cache.find((x) => djRole.roles.map((y) => y.roleId).includes(x.id));
+                        if (!findDJRole) {
+                            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                                return await interaction.reply({
+                                    content: 'You need to have the DJ role to use this command.',
+                                    ephemeral: true,
+                                });
                             }
                         }
                     }
                 }
             }
-            if (!this.client.cooldowns.has(commandName)) {
-                this.client.cooldowns.set(commandName, new Collection());
+            if (!this.client.cooldown.has(commandName)) {
+                this.client.cooldown.set(commandName, new Collection());
             }
             const now = Date.now();
-            const timestamps = this.client.cooldowns.get(commandName);
+            const timestamps = this.client.cooldown.get(commandName);
             const cooldownAmount = Math.floor(command.cooldown || 5) * 1000;
             if (!timestamps.has(interaction.user.id)) {
                 timestamps.set(interaction.user.id, now);
@@ -151,7 +173,7 @@ export default class InteractionCreate extends Event {
             }
             catch (error) {
                 this.client.logger.error(error);
-                await interaction.reply({ content: `An error occured: \`${error}\`` });
+                await interaction.reply({ content: `An error occurred: \`${error}\`` });
             }
         }
     }

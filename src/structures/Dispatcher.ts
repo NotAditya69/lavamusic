@@ -26,7 +26,6 @@ export class Song implements Track {
     }
   }
 }
-
 export default class Dispatcher {
   private client: Lavamusic;
   public guildId: string;
@@ -86,7 +85,6 @@ export default class Dispatcher {
   }
   public async play(): Promise<void> {
     if (!this.exists || (!this.queue.length && !this.current)) {
-      this.destroy();
       return;
     }
     this.current = this.queue.length !== 0 ? this.queue.shift() : this.queue[0];
@@ -155,7 +153,9 @@ export default class Dispatcher {
   public stop() {
     if (!this.player) return;
     this.queue.length = 0;
+    this.loop = 'off';
     this.repeat = 0;
+    this.stopped = true;
     this.player.stopTrack();
   }
   public setLoop(loop: any) {
