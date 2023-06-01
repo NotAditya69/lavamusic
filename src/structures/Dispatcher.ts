@@ -92,7 +92,6 @@ export default class Dispatcher {
     const search = (await this.node.rest.resolve(
       `${this.client.config.searchEngine}:${this.current?.info.title} ${this.current?.info.author}`,
     )) as any;
-
     this.matchedTracks.push(...search.tracks);
     this.player.playTrack({ track: this.current?.track });
   }
@@ -171,7 +170,7 @@ export default class Dispatcher {
     }
   }
   public async Autoplay(song: Song) {
-    const resolve = await this.node.rest.resolve(`ytmsearch:${song.info.author}`);
+    const resolve = await this.node.rest.resolve(`${this.client.config.searchEngine}:${song.info.author}`);
     if (!resolve || !resolve.tracks.length) return this.destroy();
     let choosed = new Song(resolve.tracks[Math.floor(Math.random() * resolve.tracks.length)], this.client.user);
     if (this.queue.some((s) => s.track === choosed.track)) {

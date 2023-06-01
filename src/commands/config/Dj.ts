@@ -6,7 +6,7 @@ export default class Dj extends Command {
     super(client, {
       name: 'dj',
       description: {
-        content: "Shows the bot's prefix",
+        content: "Manage the DJ mode and associated roles",
         examples: ['dj add @role', 'dj remove @role', 'dj clear', 'dj toggle'],
         usage: 'dj',
       },
@@ -151,6 +151,14 @@ export default class Dj extends Command {
         });
       await this.client.prisma.roles.deleteMany({
         where: { guildId: ctx.guild.id },
+      });
+      await this.client.prisma.dj.update({
+        where: {
+          guildId: ctx.guild.id,
+        },
+        data: {
+          mode: false,
+        },
       });
       return await ctx.sendMessage({
         embeds: [embed.setDescription(`All dj roles have been removed`)],
