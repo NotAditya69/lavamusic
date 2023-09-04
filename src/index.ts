@@ -1,7 +1,8 @@
-import config from "./config.js";
+import config from "./config";
 import { ShardingManager } from "discord.js";
-import Logger from "./structures/Logger.js";
+import Logger from "./structures/Logger";
 import * as fs from 'fs';
+
 
 const logger = new Logger();
 
@@ -34,6 +35,7 @@ manager.on("shardCreate", (shard) => {
     logger.start(`[CLIENT] Shard ${shard.id} connected to Discord's Gateway.`);
   });
 });
+
 
 /**
  * Project: lavamusic

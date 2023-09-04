@@ -1,6 +1,6 @@
 import { User, Message } from 'discord.js';
 import { Player, Track, Node } from 'shoukaku';
-import { Lavamusic } from './index.js';
+import { Lavamusic } from './index';
 
 export class Song implements Track {
   track: string;
@@ -18,6 +18,7 @@ export class Song implements Track {
     requester?: User;
   };
   constructor(track: Song, user: User) {
+    if (!track) throw new Error('Track is not provided');
     this.track = track.track;
     this.info = track.info;
     if (this.info && this.info.requester === undefined) this.info.requester = user;
@@ -45,6 +46,7 @@ export default class Dispatcher {
   public filters: Array<string>;
   public autoplay: boolean;
   public nowPlayingMessage: Message | null;
+  public history: Song[] = [];
 
   constructor(options: DispatcherOptions) {
     this.client = options.client;
@@ -94,6 +96,12 @@ export default class Dispatcher {
     )) as any;
     this.matchedTracks.push(...search.tracks);
     this.player.playTrack({ track: this.current?.track });
+    if (this.current) {
+      this.history.push(this.current);
+      if (this.history.length > 100) {
+        this.history.shift();
+      }
+    }
   }
   public pause() {
     if (!this.player) return;
@@ -118,6 +126,7 @@ export default class Dispatcher {
   }
   public destroy() {
     this.queue.length = 0;
+    this.history = [];
     this.player.connection.disconnect();
     this.client.queue.delete(this.guildId);
     if (this.stopped) return;
@@ -152,10 +161,13 @@ export default class Dispatcher {
   public stop() {
     if (!this.player) return;
     this.queue.length = 0;
+    this.history = [];
     this.loop = 'off';
+    this.autoplay = false;
     this.repeat = 0;
     this.stopped = true;
     this.player.stopTrack();
+    this.player.connection.disconnect();
   }
   public setLoop(loop: any) {
     this.loop = loop;
@@ -172,12 +184,28 @@ export default class Dispatcher {
   public async Autoplay(song: Song) {
     const resolve = await this.node.rest.resolve(`${this.client.config.searchEngine}:${song.info.author}`);
     if (!resolve || !resolve.tracks.length) return this.destroy();
-    let choosed = new Song(resolve.tracks[Math.floor(Math.random() * resolve.tracks.length)], this.client.user);
-    if (this.queue.some((s) => s.track === choosed.track)) {
-      return this.Autoplay(song);
+
+    let choosed: Song | null = null;
+    const maxAttempts = 10; // Maximum number of attempts to find a unique song
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      const potentialChoice = new Song(resolve.tracks[Math.floor(Math.random() * resolve.tracks.length)], this.client.user);
+
+      // Check if the chosen song is not already in the queue or history
+      if (!this.queue.some((s) => s.track === potentialChoice.track) && !this.history.some((s) => s.track === potentialChoice.track)) {
+        choosed = potentialChoice;
+        break;
+      }
+
+      attempts++;
     }
-    this.queue.push(choosed);
-    return this.isPlaying();
+
+    if (choosed) {
+      this.queue.push(choosed);
+      return this.isPlaying();
+    }
+    return this.destroy();
   }
   public async setAutoplay(autoplay: boolean) {
     this.autoplay = autoplay;

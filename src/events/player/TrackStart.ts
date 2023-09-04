@@ -1,8 +1,8 @@
-import { Event, Lavamusic, Dispatcher } from '../../structures/index.js';
+import { Event, Lavamusic, Dispatcher } from '../../structures/index';
 import { Player } from 'shoukaku';
-import { Song } from '../../structures/Dispatcher.js';
+import { Song } from '../../structures/Dispatcher';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, TextChannel, Interaction, ButtonInteraction, ChannelSelectMenuInteraction, MentionableSelectMenuInteraction, RoleSelectMenuInteraction, StringSelectMenuInteraction, UserSelectMenuInteraction } from 'discord.js';
-import { trackStart } from '../../utils/SetupSystem.js';
+import { trackStart } from '../../utils/SetupSystem';
 
 export default class TrackStart extends Event {
   constructor(client: Lavamusic, file: string) {
@@ -19,16 +19,19 @@ export default class TrackStart extends Event {
     function buttonBuilder() {
       const previousButton = new ButtonBuilder()
         .setCustomId('previous')
-        .setLabel(`Previous`)
+        .setEmoji('⏪')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(dispatcher.previous ? false : true);
       const resumeButton = new ButtonBuilder()
         .setCustomId('resume')
-        .setLabel(player.paused ? `Resume` : `Pause`)
+        .setEmoji(player.paused ? '▶️' : '⏸️')
         .setStyle(player.paused ? ButtonStyle.Success : ButtonStyle.Secondary);
-      const stopButton = new ButtonBuilder().setCustomId('stop').setLabel(`Stop`).setStyle(ButtonStyle.Danger);
-      const skipButton = new ButtonBuilder().setCustomId('skip').setLabel(`Skip`).setStyle(ButtonStyle.Secondary);
-      const loopButton = new ButtonBuilder().setCustomId('loop').setLabel(`Loop`).setStyle(ButtonStyle.Secondary);
+      const stopButton = new ButtonBuilder().setCustomId('stop').setEmoji('⏹️').setStyle(ButtonStyle.Danger);
+      const skipButton = new ButtonBuilder().setCustomId('skip').setEmoji('⏩').setStyle(ButtonStyle.Secondary);
+      const loopButton = new ButtonBuilder()
+        .setCustomId('loop')
+        .setEmoji(dispatcher.loop === 'repeat' ? '🔂' : '🔁')
+        .setStyle(dispatcher.loop !== 'off' ? ButtonStyle.Success : ButtonStyle.Secondary);
 
       return new ActionRowBuilder<ButtonBuilder>().addComponents(
         previousButton,
@@ -186,7 +189,7 @@ export default class TrackStart extends Event {
                     iconURL: interaction.user.avatarURL({}),
                   }),
                 ],
-                components: [buttonBuilder()],
+                components: [],
               });
             break;
           case 'loop':

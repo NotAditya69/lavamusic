@@ -10,7 +10,6 @@
 [![Run on Repl.it](https://repl.it/badge/github/brblacky/lavamusic)](https://repl.it/github/brblacky/lavamusic)
 [![Remix on Glitch](https://cdn.glitch.com/2703baf2-b643-4da7-ab91-7ee2a2d00b5b%2Fremix-button.svg)](https://glitch.com/edit/#!/import/github/brblacky/lavamusic)
 
-
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -42,7 +41,7 @@
 - 24/7 Music Playback
 - Playlist commands
 - Setup music channel
-
+- Dashboard (Work in progress)
 ## 🎶 Support Sources
 
 🔍 **Default Sources**:
@@ -110,16 +109,16 @@
 
 Before starting with the installation, you need to have the following:
 
-- ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white) [v18.16.0 or higher](https://nodejs.org/en/download/)
+- ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white) [v18.17.1 or higher](https://nodejs.org/en/download/)
 - ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white) [v4.4.0 or higher](https://www.mongodb.com/try/download/community)
-- ![Lavalink](https://img.shields.io/badge/Lavalink-7289DA?style=for-the-badge&logo=discord&logoColor=white) [v3.7.5 or higher](https://github.com/freyacodes/Lavalink)
+- ![Lavalink](https://img.shields.io/badge/Lavalink-7289DA?style=for-the-badge&logo=discord&logoColor=white) [v3.7.8 or higher](https://github.com/freyacodes/Lavalink)
 
 ## 🚀 Installation from source
 
 1. Clone the Lavamusic repository:
-  
+
   ```bash
-  git clone  https://github.com/brblacky/lavamusic.git
+  git clone https://github.com/brblacky/lavamusic.git
 ```
 
 2. change the directory to Lavamusic
@@ -131,13 +130,13 @@ cd lavamusic
 3. Install the required packages:
 
 ```bash
-npm install
+npm i
 ```
 
 4. Set up your environment variables:
 
 Create a `.env` file in the root directory of your project with the following variables:
-  
+
   ```bash
 TOKEN="." # Your bot token
 PREFIX="!" # Your prefix
@@ -150,6 +149,7 @@ LAVALINK_URL="lava.moebot.xyz:443" # Your lavalink url
 LAVALINK_AUTH="youshallnotpass" # Your lavalink password
 LAVALINK_NAME="Blacky" # Your lavalink name
 LAVALINK_SECURE= "true" # true for secure lavalink
+BOT_ACTIVITY_TYPE=0 # Activity type is a number from 0 to 5 see more here https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
 
 ```
 
@@ -167,13 +167,13 @@ generator client {
 ```
 
  and then run this command
-  
+
   ```bash
   npx prisma generate
 ```
 
 6. Run the bot:
-  
+
   ```bash
   npm run start or npm start
 ```
@@ -182,13 +182,13 @@ generator client {
 
 Generate an invite link for your bot and invite it to your server using the Discord Developer Portal or using permissions calculator: <https://discordapi.com/permissions.html>
 
-## 🚀 Installation using docker-compose
+## 🚀 Installation using Docker Compose
 
-This section assumes you have docker and docker-compose installed and is running correctly.
+This section assumes you have Docker and Docker Compose installed and running correctly.
 
-Download the [Docker-Compose file](https://raw.githubusercontent.com/brblacky/lavamusic/main/docker-compose.yml) in a seperate folder like lavamusic.
+Download the [docker-compose.yml file](https://raw.githubusercontent.com/brblacky/lavamusic/main/docker-compose.yml) in a seperate folder like lavamusic.
 
-Edit the Docker-Compose file and make sure to edit the following variables:
+Edit docker-compose.yml and make sure to set the following variables:
 
 ```yaml
 TOKEN="." # Your bot token and remember, don't show everyone your bot token
@@ -200,11 +200,10 @@ PRODUCTION="true" # "true" for production
 
 ```
 
-For more information how to fill all the varialabes go to this page.
-You do not need to edit anything like the LAVA_LINK_URL, LAVA_LINK_AUTH, LAVA_LINK_NAME, LAVA_LINK_SECURE, DATABASE_URL, and the ports.
-Unless you know what your doing.
+For more information how to fill all the variables go to this page.
+You do not need to edit anything like the LAVA_LINK_URL, LAVA_LINK_AUTH, LAVA_LINK_NAME, LAVA_LINK_SECURE, DATABASE_URL, and the ports unless you know what you're doing.
 
-After saving your changes you can open a terminal and go to the same location as the docker-compose file. Then type the following:
+After saving your changes you can open a terminal and go to the same location as the docker-compose.yml file. Then run the following:
 
 ```bash
 docker-compose up -d
@@ -261,13 +260,12 @@ Your contribution will be reviewed by the project maintainers, and any necessary
 
 Distributed under the Apache-2.0 license License. See ![LICENSE](https://img.shields.io/github/license/brblacky/lavamusic?style=social) for more information.
 
-
 ## ☕ Donate
+
 Do you like this project? Support it by donating
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H7LKT9L)
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/sdip521)
-
 
 ## 👥 Contributors
 
@@ -276,7 +274,6 @@ Thanks goes to these wonderful people :
 <a href="https://github.com/brblacky/lavamusic/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=brblacky/lavamusic" />
 </a>
-
 
 [version-shield]: https://img.shields.io/github/package-json/v/brblacky/lavamusic?style=for-the-badge
 [contributors-shield]: https://img.shields.io/github/contributors/brblacky/lavamusic.svg?style=for-the-badge

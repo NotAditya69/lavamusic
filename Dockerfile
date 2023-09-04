@@ -1,40 +1,35 @@
-# Setup image for building Typescript
+# Stage 1: Build TypeScript
 FROM node:18 as builder
 
-# Set Work Directory
 WORKDIR /opt/lavamusic/
 
-# Install dependencies
+# Copy package files and install dependencies
 COPY package*.json ./
+RUN npm install
 
-# Update NPM and Clean Install Packages
-RUN npm install -g npm@latest
-RUN npm ci
-
+# Copy source code
 COPY . .
 
+# Generate Prisma files (Ensure you have schema.prisma in your project)
+RUN npx prisma generate
+
+# Build TypeScript
 RUN npm run build
 
-
-## final image delivery
+# Stage 2: Create production image
 FROM node:18-slim
 
-#Tell NodeJS that this will run in prod
 ENV NODE_ENV production
 
-# Set Working Directory
 WORKDIR /opt/lavamusic/
 
-# Install dependencies
+# Copy package files and install dependencies
 COPY package*.json ./
-# Copy Required Files, compiled js, 
+RUN npm install --only=production
+
+# Copy compiled code
 COPY --from=builder /opt/lavamusic/dist ./dist
 COPY --from=builder /opt/lavamusic/src/utils/LavaLogo.txt ./src/utils/LavaLogo.txt
 COPY --from=builder /opt/lavamusic/prisma ./prisma
-
-## Update NPM, Clean Install Packages, and Generate Prisma Files
-RUN npm install -g npm@latest
-RUN npm ci --omit=dev
-RUN npx prisma generate
 
 CMD [ "node", "dist/index.js" ]

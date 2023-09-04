@@ -1,13 +1,15 @@
 {
   "name": "lavamusic",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "LavaMusic is a music bot for Discord, written in JavaScript using the Discord.js, Typescript, Shoukaku (Lavalink) library.",
-  "type": "module",
   "main": "dist/index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "npm run start:bot",
-    "start:bot": "npm run build && node --enable-source-maps dist/index.js",
-    "build": "tsc --project tsconfig.json"
+    "prisma:generate": "npx prisma generate",
+    "start:bot": "npm run build && node dist/index.js",
+    "build": "tsc --project tsconfig.json",
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",
@@ -15,7 +17,7 @@
   },
   "keywords": [
     "discord",
-    "music", 
+    "music",
     "bot",
     "lavalink",
     "shoukaku",
@@ -30,18 +32,31 @@
   },
   "homepage": "https://github.com/brblacky/lavamusic#readme",
   "devDependencies": {
-    "@types/node": "^18.14.5",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/express-session": "^1.17.7",
+    "@types/node": "^20.5.6",
+    "@types/passport": "^1.0.12",
+    "@types/passport-discord": "^0.1.6",
     "@types/signale": "^1.4.4",
-    "prisma": "^4.11.0",
+    "prisma": "^5.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@prisma/client": "^4.11.0",
-    "discord.js": "^14.9.0",
-    "dotenv": "^16.0.3",
-    "shoukaku": "^3.3.1",
-    "signale": "^1.4.0"
+    "@prisma/client": "^5.2.0",
+    "connect-mongo": "^5.0.0",
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "passport": "^0.6.0",
+    "passport-discord": "^0.1.4",
+    "shoukaku": "^3.4.0",
+    "signale": "^1.4.0",
+    "socket.io": "^4.7.2",
+    "tslib": "^2.6.2",
+    "undici": "^5.23.0"
   },
   "signale": {
     "displayScope": true,
@@ -51,5 +66,22 @@
     "displayLabel": true,
     "displayTimestamp": true,
     "underlineLabel": true
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
   }
 }
